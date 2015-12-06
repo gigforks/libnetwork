@@ -341,7 +341,7 @@ func (c *controller) NewNetwork(networkType, name string, options ...NetworkOpti
 	network := &network{
 		name:        name,
 		networkType: networkType,
-		generic:     map[string]interface{}{netlabel.GenericData: make(map[string]string)},
+		generic:     map[string]interface{}{netlabel.GenericData: make(map[string]string), netlabel.Name: name},
 		ipamType:    ipamapi.DefaultIPAM,
 		id:          stringid.GenerateRandomID(),
 		ctrlr:       c,

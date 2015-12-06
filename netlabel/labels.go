@@ -18,6 +18,9 @@ const (
 	// GenericData constant that helps to identify an option as a Generic constant
 	GenericData = Prefix + ".generic"
 
+	// Name of the network
+	Name = Prefix + ".name"
+
 	// PortMap constant represents Port Mapping
 	PortMap = Prefix + ".portmap"
 
