@@ -63,6 +63,7 @@ type containerConfiguration struct {
 type ovsEndpoint struct {
 	id              string
 	srcName         string
+	hostIfName      string
 	addr            *net.IPNet
 	addrv6          *net.IPNet
 	macAddress      net.HardwareAddr
@@ -380,7 +381,7 @@ func (d *driver) CreateEndpoint(nid, eid string, ifInfo driverapi.InterfaceInfo,
 		return fmt.Errorf("adding interface %s to bridge %s failed: %v", hostIfName, config.BridgeName, err)
 	}
 
-	// Create the sandbox side pipe interface
+	endpoint.hostIfName = hostIfName
 	endpoint.srcName = containerIfName
 	endpoint.macAddress = ifInfo.MacAddress()
 	endpoint.addr = ifInfo.Address()
@@ -473,6 +474,13 @@ func (d *driver) DeleteEndpoint(nid, eid string) error {
 			n.Unlock()
 		}
 	}()
+
+	// Try removal of the interface from the ovs bridge.
+	// Also make sure defer does not see this error either.
+	logrus.Debugf("Removing %s from ovs bridge", ep.hostIfName)
+	if out, err := exec.Command("ovs-vsctl", "del-port", ep.hostIfName).CombinedOutput(); err != nil {
+		logrus.Warningf("Removing iface from ovs failed with message: `%s`, error: %v", strings.TrimSpace(string(out)), err)
+	}
 
 	// Try removal of link. Discard error: it is a best effort.
 	// Also make sure defer does not see this error either.
